@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Learning Assistant - Powered by Confluence</title>
+    <title>Gusto Knowledge Base - Learning Assistant</title>
     <style>
         * {
             margin: 0;
@@ -12,19 +12,19 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
 
         .container {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-width: 900px;
             width: 100%;
             padding: 40px;
@@ -32,94 +32,85 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         h1 {
-            color: #333;
-            margin-bottom: 10px;
+            color: #2d3748;
             font-size: 2.5em;
+            margin-bottom: 10px;
             text-align: center;
         }
 
         .subtitle {
+            color: #718096;
             text-align: center;
-            color: #666;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             font-size: 1.1em;
         }
 
-        .input-section {
+        .search-box {
+            position: relative;
             margin-bottom: 30px;
         }
 
-        label {
-            display: block;
-            margin-bottom: 10px;
-            color: #555;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-
-        #learningTopic {
+        #topicInput {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            font-family: inherit;
-        }
-
-        #learningTopic:focus {
+            padding: 20px 60px 20px 20px;
+            font-size: 1.1em;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
             outline: none;
-            border-color: #667eea;
         }
 
-        button {
+        #topicInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #searchBtn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 15px 40px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        #searchBtn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        button:disabled {
-            opacity: 0.6;
+        #searchBtn:disabled {
+            background: #cbd5e0;
             cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
         }
 
         .loading {
-            display: none;
             text-align: center;
-            margin: 30px 0;
+            padding: 40px;
+            display: none;
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
+            border: 4px solid #f3f4f6;
             border-top: 4px solid #667eea;
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin {
@@ -127,64 +118,106 @@
             100% { transform: rotate(360deg); }
         }
 
-        .result-section {
+        .results {
             display: none;
-            margin-top: 40px;
-            animation: fadeIn 0.5s ease-in;
         }
 
-        .result-section h2 {
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .content-card {
-            background: #f8f9fa;
-            border-radius: 10px;
+        .summary {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
             padding: 25px;
-            margin-bottom: 20px;
-            border-left: 5px solid #667eea;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
         }
 
-        .content-card h3 {
-            color: #667eea;
+        .summary h2 {
+            color: #2d3748;
             margin-bottom: 15px;
+            font-size: 1.5em;
         }
 
-        .content-card p {
-            color: #555;
+        .summary-content {
+            color: #4a5568;
             line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .articles {
+            margin-top: 30px;
+        }
+
+        .articles h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .article-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .article-card:hover {
+            transform: translateX(5px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .article-title {
+            color: #2d3748;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .article-space {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
             margin-bottom: 10px;
         }
 
-        .content-card a {
+        .article-excerpt {
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .article-link {
+            display: inline-block;
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.3s;
+            transition: all 0.3s ease;
         }
 
-        .content-card a:hover {
+        .article-link:hover {
             color: #764ba2;
-            text-decoration: underline;
+            transform: translateX(3px);
         }
 
-        .error-message {
-            display: none;
-            background: #fee;
-            color: #c33;
+        .error {
+            background: #fed7d7;
+            color: #c53030;
             padding: 20px;
-            border-radius: 10px;
-            border-left: 5px solid #c33;
+            border-radius: 12px;
             margin-top: 20px;
+            display: none;
+            border-left: 4px solid #c53030;
         }
 
         .no-results {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #718096;
+            display: none;
         }
 
         .no-results-icon {
@@ -192,194 +225,245 @@
             margin-bottom: 20px;
         }
 
-        @media (max-width: 600px) {
+        .badge {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
             .container {
-                padding: 25px;
+                padding: 20px;
             }
 
             h1 {
-                font-size: 2em;
+                font-size: 1.8em;
+            }
+
+            #topicInput {
+                padding: 15px 15px 15px 15px;
+                font-size: 1em;
+            }
+
+            #searchBtn {
+                position: static;
+                transform: none;
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            #searchBtn:hover {
+                transform: scale(1.02);
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎓 AI Learning Assistant</h1>
-        <p class="subtitle">Powered by Confluence Knowledge Base</p>
+        <h1>🎓 Gusto Knowledge Base</h1>
+        <p class="subtitle">Ask me anything you want to learn from Confluence</p>
 
-        <div class="input-section">
-            <label for="learningTopic">What would you like to learn today?</label>
+        <div class="search-box">
             <input 
                 type="text" 
-                id="learningTopic" 
-                placeholder="e.g., How to use React hooks, JavaScript async/await, Python data structures..."
+                id="topicInput" 
+                placeholder="What do you want to learn? (e.g., payment operations, SOP process, ICP...)"
                 autocomplete="off"
             >
+            <button id="searchBtn">Search 🔍</button>
         </div>
-
-        <button id="searchBtn" onclick="searchAndLearn()">
-            🚀 Start Learning
-        </button>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p style="margin-top: 15px; color: #666;">Searching Confluence for the best content...</p>
+            <p>Searching Confluence knowledge base...</p>
         </div>
 
-        <div class="error-message" id="errorMessage"></div>
+        <div class="error" id="error"></div>
 
-        <div class="result-section" id="resultSection">
-            <h2>📚 Learning Content</h2>
-            <div id="contentContainer"></div>
+        <div class="no-results" id="noResults">
+            <div class="no-results-icon">🔍</div>
+            <h3>No articles found</h3>
+            <p>Try searching with different keywords or terms</p>
+        </div>
+
+        <div class="results" id="results">
+            <div class="summary" id="summarySection">
+                <h2>📚 Summary</h2>
+                <div class="summary-content" id="summaryContent"></div>
+            </div>
+
+            <div class="articles">
+                <h3>📖 Related Articles <span class="badge" id="articleCount">0</span></h3>
+                <div id="articlesList"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Confluence authentication
-        const CONFLUENCE_EMAIL = 'yarkin.akcil@gusto.com';
-        const CONFLUENCE_API_KEY = 'ATATT3xFfGF0DPdNek3hkIdA_A-AB3dc_RJ4qtMCuzTz-NJLvruBn9WOtIc3XcLCUhXCC02zbi0hfFcMLmwuR1E3pl-C0MUjnK82eqKFUZyeJ2IB08SHXcYQw5IrdO-KNv4uUKCm2-9--SuagbRC4o1aXDlmiFzD1z6vWvUR7UOGdxiaRkid2Pk=2117C5E8';
-        
-        // Confluence domain for Gusto
+        // Cloudflare Worker URL
+        const WORKER_URL = 'https://late-firefly-bcc3.yarkinakcil.workers.dev';
         const CONFLUENCE_DOMAIN = 'gustohq.atlassian.net';
-        
-        // Create base64 encoded auth string for Basic Authentication
-        const authString = btoa(`${CONFLUENCE_EMAIL}:${CONFLUENCE_API_KEY}`);
-        
-        // Allow Enter key to submit
-        document.getElementById('learningTopic').addEventListener('keypress', function(e) {
+
+        const topicInput = document.getElementById('topicInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const results = document.getElementById('results');
+        const noResults = document.getElementById('noResults');
+        const summaryContent = document.getElementById('summaryContent');
+        const articlesList = document.getElementById('articlesList');
+        const articleCount = document.getElementById('articleCount');
+
+        // Search on Enter key
+        topicInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                searchAndLearn();
+                searchTopic();
             }
         });
 
-        async function searchAndLearn() {
-            const topic = document.getElementById('learningTopic').value.trim();
+        searchBtn.addEventListener('click', searchTopic);
+
+        async function searchTopic() {
+            const topic = topicInput.value.trim();
             
             if (!topic) {
-                showError('Please enter what you would like to learn!');
+                showError('Please enter a topic to search');
                 return;
             }
 
-            // Show loading, hide previous results
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('resultSection').style.display = 'none';
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('searchBtn').disabled = true;
+            // Reset UI
+            hideAll();
+            loading.style.display = 'block';
+            searchBtn.disabled = true;
 
             try {
-                const results = await searchConfluence(topic);
-                displayResults(results, topic);
-            } catch (error) {
-                showError('Failed to fetch content from Confluence. Please check your API key and domain settings.');
-                console.error('Error:', error);
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('searchBtn').disabled = false;
-            }
-        }
-
-        async function searchConfluence(query) {
-            const searchUrl = `https://${CONFLUENCE_DOMAIN}/wiki/rest/api/content/search?cql=text~"${encodeURIComponent(query)}"&limit=5&expand=body.view,space`;
-            
-            const response = await fetch(searchUrl, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Basic ${authString}`,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                // Call Cloudflare Worker
+                const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(topic)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
                 }
-            });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+
+                if (!data.results || data.results.length === 0) {
+                    showNoResults();
+                    return;
+                }
+
+                displayResults(data.results, topic);
+
+            } catch (err) {
+                console.error('Search error:', err);
+                showError(`Failed to search Confluence: ${err.message}`);
+            } finally {
+                loading.style.display = 'none';
+                searchBtn.disabled = false;
             }
-
-            const data = await response.json();
-            return data.results || [];
         }
 
-        function displayResults(results, topic) {
-            const contentContainer = document.getElementById('contentContainer');
-            const resultSection = document.getElementById('resultSection');
+        function displayResults(articles, topic) {
+            // Generate summary
+            const summary = generateSummary(articles, topic);
+            summaryContent.innerHTML = summary;
 
-            if (results.length === 0) {
-                contentContainer.innerHTML = `
-                    <div class="no-results">
-                        <div class="no-results-icon">🔍</div>
-                        <h3>No results found</h3>
-                        <p>We couldn't find any Confluence articles about "${topic}".</p>
-                        <p>Try using different keywords or broaden your search.</p>
-                    </div>
-                `;
-                resultSection.style.display = 'block';
-                return;
-            }
+            // Display articles
+            articleCount.textContent = articles.length;
+            articlesList.innerHTML = '';
 
-            let html = `<div class="content-card" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-left: 5px solid #667eea;">
-                <h3>✨ Found ${results.length} relevant article${results.length > 1 ? 's' : ''} about "${topic}"</h3>
-                <p>Here's what we found in your Confluence knowledge base:</p>
-            </div>`;
-
-            results.forEach((result, index) => {
-                const title = result.title;
-                const excerpt = extractTextFromHtml(result.body?.view?.value || '');
-                const url = `https://${CONFLUENCE_DOMAIN}/wiki${result._links.webui}`;
-                const space = result.space?.name || 'Unknown Space';
-
-                html += `
-                    <div class="content-card">
-                        <h3>${index + 1}. ${title}</h3>
-                        <p style="color: #888; font-size: 0.9em; margin-bottom: 15px;">
-                            📁 Space: ${space}
-                        </p>
-                        <p>${excerpt}</p>
-                        <p style="margin-top: 15px;">
-                            <a href="${url}" target="_blank" rel="noopener noreferrer">
-                                📖 Read full article →
-                            </a>
-                        </p>
-                    </div>
-                `;
+            articles.forEach(article => {
+                const card = createArticleCard(article);
+                articlesList.appendChild(card);
             });
 
-            contentContainer.innerHTML = html;
-            resultSection.style.display = 'block';
+            results.style.display = 'block';
         }
 
-        function extractTextFromHtml(html) {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
+        function generateSummary(articles, topic) {
+            const topSpaces = [...new Set(articles.map(a => a.space?.name).filter(Boolean))].slice(0, 3);
+            const spacesList = topSpaces.join(', ');
+
+            return `
+                <p><strong>Topic:</strong> ${escapeHtml(topic)}</p>
+                <p><strong>Found:</strong> ${articles.length} relevant article${articles.length > 1 ? 's' : ''}</p>
+                <p><strong>Spaces:</strong> ${spacesList || 'Various'}</p>
+                <p style="margin-top: 15px;">
+                    I found <strong>${articles.length}</strong> Confluence articles related to <strong>"${escapeHtml(topic)}"</strong>. 
+                    These articles cover various aspects and will help you understand the topic better. 
+                    Click on any article below to read the full content.
+                </p>
+            `;
+        }
+
+        function createArticleCard(article) {
+            const card = document.createElement('div');
+            card.className = 'article-card';
+
+            const title = document.createElement('div');
+            title.className = 'article-title';
+            title.textContent = article.title;
+
+            const space = document.createElement('span');
+            space.className = 'article-space';
+            space.textContent = article.space?.name || 'Unknown Space';
+
+            const excerpt = document.createElement('div');
+            excerpt.className = 'article-excerpt';
+            const content = article.body?.view?.value || article.excerpt || '';
+            excerpt.innerHTML = extractExcerpt(content);
+
+            const link = document.createElement('a');
+            link.className = 'article-link';
+            link.href = `https://${CONFLUENCE_DOMAIN}/wiki${article._links.webui}`;
+            link.target = '_blank';
+            link.textContent = 'Read full article →';
+
+            card.appendChild(title);
+            card.appendChild(space);
+            card.appendChild(excerpt);
+            card.appendChild(link);
+
+            return card;
+        }
+
+        function extractExcerpt(html, maxLength = 200) {
+            const text = html.replace(/<[^>]*>/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
             
-            // Remove script and style tags
-            const scripts = tempDiv.getElementsByTagName('script');
-            const styles = tempDiv.getElementsByTagName('style');
-            for (let i = scripts.length - 1; i >= 0; i--) {
-                scripts[i].remove();
+            if (text.length <= maxLength) {
+                return escapeHtml(text);
             }
-            for (let i = styles.length - 1; i >= 0; i--) {
-                styles[i].remove();
-            }
             
-            let text = tempDiv.textContent || tempDiv.innerText || '';
-            
-            // Clean up whitespace
-            text = text.replace(/\s+/g, ' ').trim();
-            
-            // Truncate to a reasonable length
-            if (text.length > 300) {
-                text = text.substring(0, 300) + '...';
-            }
-            
-            return text || 'No preview available.';
+            return escapeHtml(text.substring(0, maxLength)) + '...';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
+            hideAll();
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+
+        function showNoResults() {
+            hideAll();
+            noResults.style.display = 'block';
+        }
+
+        function hideAll() {
+            error.style.display = 'none';
+            results.style.display = 'none';
+            noResults.style.display = 'none';
         }
     </script>
 </body>
 </html>
-
