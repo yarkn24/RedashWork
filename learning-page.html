@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gusto Knowledge Base - Learning Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #718096;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        #topicInput {
+            width: 100%;
+            padding: 20px 60px 20px 20px;
+            font-size: 1.1em;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #topicInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #searchBtn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        #searchBtn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #searchBtn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .summary-content {
+            color: #4a5568;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .articles {
+            margin-top: 30px;
+        }
+
+        .articles h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .article-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .article-card:hover {
+            transform: translateX(5px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .article-title {
+            color: #2d3748;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .article-space {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .article-excerpt {
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .article-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .article-link:hover {
+            color: #764ba2;
+            transform: translateX(3px);
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+            border-left: 4px solid #c53030;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            display: none;
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            #topicInput {
+                padding: 15px 15px 15px 15px;
+                font-size: 1em;
+            }
+
+            #searchBtn {
+                position: static;
+                transform: none;
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            #searchBtn:hover {
+                transform: scale(1.02);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Gusto Knowledge Base</h1>
+        <p class="subtitle">Ask me anything you want to learn from Confluence</p>
+
+        <div class="search-box">
+            <input 
+                type="text" 
+                id="topicInput" 
+                placeholder="What do you want to learn? (e.g., payment operations, SOP process, ICP...)"
+                autocomplete="off"
+            >
+            <button id="searchBtn">Search 🔍</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Searching Confluence knowledge base...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="no-results" id="noResults">
+            <div class="no-results-icon">🔍</div>
+            <h3>No articles found</h3>
+            <p>Try searching with different keywords or terms</p>
+        </div>
+
+        <div class="results" id="results">
+            <div class="summary" id="summarySection">
+                <h2>📚 Summary</h2>
+                <div class="summary-content" id="summaryContent"></div>
+            </div>
+
+            <div class="articles">
+                <h3>📖 Related Articles <span class="badge" id="articleCount">0</span></h3>
+                <div id="articlesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cloudflare Worker URL
+        const WORKER_URL = 'https://late-firefly-bcc3.yarkinakcil.workers.dev';
+        const CONFLUENCE_DOMAIN = 'gustohq.atlassian.net';
+
+        const topicInput = document.getElementById('topicInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const results = document.getElementById('results');
+        const noResults = document.getElementById('noResults');
+        const summaryContent = document.getElementById('summaryContent');
+        const articlesList = document.getElementById('articlesList');
+        const articleCount = document.getElementById('articleCount');
+
+        // Search on Enter key
+        topicInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchTopic();
+            }
+        });
+
+        searchBtn.addEventListener('click', searchTopic);
+
+        async function searchTopic() {
+            const topic = topicInput.value.trim();
+            
+            if (!topic) {
+                showError('Please enter a topic to search');
+                return;
+            }
+
+            // Reset UI
+            hideAll();
+            loading.style.display = 'block';
+            searchBtn.disabled = true;
+
+            try {
+                // Call Cloudflare Worker
+                const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(topic)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.results || data.results.length === 0) {
+                    showNoResults();
+                    return;
+                }
+
+                displayResults(data.results, topic);
+
+            } catch (err) {
+                console.error('Search error:', err);
+                showError(`Failed to search Confluence: ${err.message}`);
+            } finally {
+                loading.style.display = 'none';
+                searchBtn.disabled = false;
+            }
+        }
+
+        function displayResults(articles, topic) {
+            // Generate summary
+            const summary = generateSummary(articles, topic);
+            summaryContent.innerHTML = summary;
+
+            // Display articles
+            articleCount.textContent = articles.length;
+            articlesList.innerHTML = '';
+
+            articles.forEach(article => {
+                const card = createArticleCard(article);
+                articlesList.appendChild(card);
+            });
+
+            results.style.display = 'block';
+        }
+
+        function generateSummary(articles, topic) {
+            const topSpaces = [...new Set(articles.map(a => a.space?.name).filter(Boolean))].slice(0, 3);
+            const spacesList = topSpaces.join(', ');
+
+            return `
+                <p><strong>Topic:</strong> ${escapeHtml(topic)}</p>
+                <p><strong>Found:</strong> ${articles.length} relevant article${articles.length > 1 ? 's' : ''}</p>
+                <p><strong>Spaces:</strong> ${spacesList || 'Various'}</p>
+                <p style="margin-top: 15px;">
+                    I found <strong>${articles.length}</strong> Confluence articles related to <strong>"${escapeHtml(topic)}"</strong>. 
+                    These articles cover various aspects and will help you understand the topic better. 
+                    Click on any article below to read the full content.
+                </p>
+            `;
+        }
+
+        function createArticleCard(article) {
+            const card = document.createElement('div');
+            card.className = 'article-card';
+
+            const title = document.createElement('div');
+            title.className = 'article-title';
+            title.textContent = article.title;
+
+            const space = document.createElement('span');
+            space.className = 'article-space';
+            space.textContent = article.space?.name || 'Unknown Space';
+
+            const excerpt = document.createElement('div');
+            excerpt.className = 'article-excerpt';
+            const content = article.body?.view?.value || article.excerpt || '';
+            excerpt.innerHTML = extractExcerpt(content);
+
+            const link = document.createElement('a');
+            link.className = 'article-link';
+            link.href = `https://${CONFLUENCE_DOMAIN}/wiki${article._links.webui}`;
+            link.target = '_blank';
+            link.textContent = 'Read full article →';
+
+            card.appendChild(title);
+            card.appendChild(space);
+            card.appendChild(excerpt);
+            card.appendChild(link);
+
+            return card;
+        }
+
+        function extractExcerpt(html, maxLength = 200) {
+            const text = html.replace(/<[^>]*>/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+            
+            if (text.length <= maxLength) {
+                return escapeHtml(text);
+            }
+            
+            return escapeHtml(text.substring(0, maxLength)) + '...';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showError(message) {
+            hideAll();
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+
+        function showNoResults() {
+            hideAll();
+            noResults.style.display = 'block';
+        }
+
+        function hideAll() {
+            error.style.display = 'none';
+            results.style.display = 'none';
+            noResults.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

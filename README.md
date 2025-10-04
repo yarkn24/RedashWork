@@ -1,6 +1,14 @@
-# AI Learning Assistant - Powered by Confluence
+# 🎓 Gusto Knowledge Base Learning Assistant
 
 An interactive learning page that searches your Confluence knowledge base and creates personalized learning content based on user queries.
+
+## 📁 Files in This Project
+
+- **`learning-page.html`** - Main learning interface (will be updated with Worker URL)
+- **`confluence-worker.js`** - Cloudflare Worker code for CORS bypass
+- **`CLOUDFLARE-SETUP.md`** - Step-by-step setup instructions
+- **`index.html`** - Original demo page
+- **`learning-assistant-local.html`** - Local-only version
 
 ## 🚀 Features
 
