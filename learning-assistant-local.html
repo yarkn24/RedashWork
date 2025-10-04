@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Learning Assistant - Powered by Confluence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .cors-notice {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: #856404;
+        }
+
+        .cors-notice h3 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        .cors-notice ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .cors-notice li {
+            margin: 5px 0;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        #learningTopic {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        #learningTopic:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .result-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .content-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .content-card p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .content-card a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .content-card a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            display: none;
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #c33;
+            margin-top: 20px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 AI Learning Assistant</h1>
+        <p class="subtitle">Powered by Confluence Knowledge Base (Personal Use)</p>
+
+        <div class="cors-notice" id="corsNotice">
+            <h3>⚠️ First Time Setup Required</h3>
+            <p>To use this tool locally, you need to disable CORS in your browser (for personal use only):</p>
+            <ol>
+                <li>Close ALL Chrome/Edge windows</li>
+                <li>Open Terminal and run:</li>
+                <div class="code-block">
+                    <strong>For Chrome:</strong><br>
+                    open -na "Google Chrome" --args --disable-web-security --user-data-dir="/tmp/chrome_dev"
+                </div>
+                <div class="code-block">
+                    <strong>For Edge:</strong><br>
+                    open -na "Microsoft Edge" --args --disable-web-security --user-data-dir="/tmp/edge_dev"
+                </div>
+                <li>A new browser window will open - use that window to open this file</li>
+                <li>You'll see a warning banner "You are using an unsupported command-line flag" - this is normal</li>
+            </ol>
+            <button onclick="document.getElementById('corsNotice').style.display='none'" style="width: auto; padding: 10px 20px; margin-top: 15px;">Got it! Hide this message</button>
+        </div>
+
+        <div class="input-section">
+            <label for="learningTopic">What would you like to learn today?</label>
+            <input 
+                type="text" 
+                id="learningTopic" 
+                placeholder="e.g., How to use React hooks, JavaScript async/await, Python data structures..."
+                autocomplete="off"
+            >
+        </div>
+
+        <button id="searchBtn" onclick="searchAndLearn()">
+            🚀 Start Learning
+        </button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Searching Confluence for the best content...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="result-section" id="resultSection">
+            <h2>📚 Learning Content</h2>
+            <div id="contentContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Confluence authentication
+        const CONFLUENCE_EMAIL = 'yarkin.akcil@gusto.com';
+        const CONFLUENCE_API_KEY = 'ATATT3xFfGF0DPdNek3hkIdA_A-AB3dc_RJ4qtMCuzTz-NJLvruBn9WOtIc3XcLCUhXCC02zbi0hfFcMLmwuR1E3pl-C0MUjnK82eqKFUZyeJ2IB08SHXcYQw5IrdO-KNv4uUKCm2-9--SuagbRC4o1aXDlmiFzD1z6vWvUR7UOGdxiaRkid2Pk=2117C5E8';
+        
+        // Confluence domain for Gusto
+        const CONFLUENCE_DOMAIN = 'gustohq.atlassian.net';
+        
+        // Create base64 encoded auth string for Basic Authentication
+        const authString = btoa(`${CONFLUENCE_EMAIL}:${CONFLUENCE_API_KEY}`);
+        
+        // Allow Enter key to submit
+        document.getElementById('learningTopic').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchAndLearn();
+            }
+        });
+
+        async function searchAndLearn() {
+            const topic = document.getElementById('learningTopic').value.trim();
+            
+            if (!topic) {
+                showError('Please enter what you would like to learn!');
+                return;
+            }
+
+            // Show loading, hide previous results
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('searchBtn').disabled = true;
+
+            try {
+                const results = await searchConfluence(topic);
+                displayResults(results, topic);
+            } catch (error) {
+                showError('Failed to fetch content from Confluence. Make sure you opened this file in a CORS-disabled browser (see instructions above). Error: ' + error.message);
+                console.error('Error:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('searchBtn').disabled = false;
+            }
+        }
+
+        async function searchConfluence(query) {
+            const searchUrl = `https://${CONFLUENCE_DOMAIN}/wiki/rest/api/content/search?cql=text~"${encodeURIComponent(query)}"&limit=5&expand=body.view,space`;
+            
+            const response = await fetch(searchUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Basic ${authString}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.results || [];
+        }
+
+        function displayResults(results, topic) {
+            const contentContainer = document.getElementById('contentContainer');
+            const resultSection = document.getElementById('resultSection');
+
+            if (results.length === 0) {
+                contentContainer.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>No results found</h3>
+                        <p>We couldn't find any Confluence articles about "${topic}".</p>
+                        <p>Try using different keywords or broaden your search.</p>
+                    </div>
+                `;
+                resultSection.style.display = 'block';
+                return;
+            }
+
+            let html = `<div class="content-card" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-left: 5px solid #667eea;">
+                <h3>✨ Found ${results.length} relevant article${results.length > 1 ? 's' : ''} about "${topic}"</h3>
+                <p>Here's what we found in your Confluence knowledge base:</p>
+            </div>`;
+
+            results.forEach((result, index) => {
+                const title = result.title;
+                const excerpt = extractTextFromHtml(result.body?.view?.value || '');
+                const url = `https://${CONFLUENCE_DOMAIN}/wiki${result._links.webui}`;
+                const space = result.space?.name || 'Unknown Space';
+
+                html += `
+                    <div class="content-card">
+                        <h3>${index + 1}. ${title}</h3>
+                        <p style="color: #888; font-size: 0.9em; margin-bottom: 15px;">
+                            📁 Space: ${space}
+                        </p>
+                        <p>${excerpt}</p>
+                        <p style="margin-top: 15px;">
+                            <a href="${url}" target="_blank" rel="noopener noreferrer">
+                                📖 Read full article →
+                            </a>
+                        </p>
+                    </div>
+                `;
+            });
+
+            contentContainer.innerHTML = html;
+            resultSection.style.display = 'block';
+        }
+
+        function extractTextFromHtml(html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            // Remove script and style tags
+            const scripts = tempDiv.getElementsByTagName('script');
+            const styles = tempDiv.getElementsByTagName('style');
+            for (let i = scripts.length - 1; i >= 0; i--) {
+                scripts[i].remove();
+            }
+            for (let i = styles.length - 1; i >= 0; i--) {
+                styles[i].remove();
+            }
+            
+            let text = tempDiv.textContent || tempDiv.innerText || '';
+            
+            // Clean up whitespace
+            text = text.replace(/\s+/g, ' ').trim();
+            
+            // Truncate to a reasonable length
+            if (text.length > 300) {
+                text = text.substring(0, 300) + '...';
+            }
+            
+            return text || 'No preview available.';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+
+
+

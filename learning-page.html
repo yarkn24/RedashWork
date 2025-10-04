@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gusto Knowledge Base - Learning Assistant</title>
+    <title>Platform Operations Learning Assistant</title>
     <style>
         * {
             margin: 0;
@@ -29,6 +29,8 @@
             width: 100%;
             padding: 40px;
             animation: fadeIn 0.5s ease-in;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         @keyframes fadeIn {
@@ -38,7 +40,7 @@
 
         h1 {
             color: #2d3748;
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
             text-align: center;
         }
@@ -47,34 +49,142 @@
             color: #718096;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 1.1em;
+            font-size: 1.05em;
         }
 
-        .search-box {
-            position: relative;
+        .chat-container {
             margin-bottom: 30px;
+            min-height: 200px;
         }
 
-        #topicInput {
+        .welcome-message {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 20px;
+        }
+
+        .welcome-message h2 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .welcome-message ul {
+            margin-left: 20px;
+            color: #4a5568;
+            line-height: 1.8;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.assistant {
+            text-align: left;
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 15px 20px;
+            border-radius: 12px;
+            max-width: 80%;
+            text-align: left;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f7fafc;
+            color: #2d3748;
+            border: 2px solid #e2e8f0;
+        }
+
+        .assistant-answer {
+            line-height: 1.8;
+            white-space: pre-wrap;
+            margin-bottom: 15px;
+        }
+
+        .articles-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .articles-title {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .article-link {
+            display: block;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            color: #667eea;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .article-link:hover {
+            background: #f7fafc;
+            border-color: #667eea;
+            transform: translateX(3px);
+        }
+
+        .article-space {
+            font-size: 0.8em;
+            color: #718096;
+            margin-left: 8px;
+        }
+
+        .input-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        #questionInput {
             width: 100%;
-            padding: 20px 60px 20px 20px;
-            font-size: 1.1em;
+            padding: 18px 60px 18px 18px;
+            font-size: 1.05em;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             transition: all 0.3s ease;
             outline: none;
+            resize: none;
+            font-family: inherit;
+            min-height: 60px;
         }
 
-        #topicInput:focus {
+        #questionInput:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        #searchBtn {
+        #askBtn {
             position: absolute;
             right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
+            bottom: 8px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -86,20 +196,20 @@
             transition: all 0.3s ease;
         }
 
-        #searchBtn:hover {
-            transform: translateY(-50%) scale(1.05);
+        #askBtn:hover {
+            transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        #searchBtn:disabled {
+        #askBtn:disabled {
             background: #cbd5e0;
             cursor: not-allowed;
-            transform: translateY(-50%) scale(1);
+            transform: scale(1);
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 20px;
             display: none;
         }
 
@@ -107,10 +217,10 @@
             border: 4px solid #f3f4f6;
             border-top: 4px solid #667eea;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
 
         @keyframes spin {
@@ -118,231 +228,157 @@
             100% { transform: rotate(360deg); }
         }
 
-        .results {
-            display: none;
-        }
-
-        .summary {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border-left: 4px solid #667eea;
-        }
-
-        .summary h2 {
-            color: #2d3748;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-
-        .summary-content {
-            color: #4a5568;
-            line-height: 1.8;
-            font-size: 1.05em;
-        }
-
-        .articles {
-            margin-top: 30px;
-        }
-
-        .articles h3 {
-            color: #2d3748;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-
-        .article-card {
-            background: #f7fafc;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .article-card:hover {
-            transform: translateX(5px);
-            border-color: #667eea;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
-        }
-
-        .article-title {
-            color: #2d3748;
-            font-size: 1.2em;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .article-space {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.85em;
-            margin-bottom: 10px;
-        }
-
-        .article-excerpt {
-            color: #718096;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-
-        .article-link {
-            display: inline-block;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .article-link:hover {
-            color: #764ba2;
-            transform: translateX(3px);
-        }
-
         .error {
             background: #fed7d7;
             color: #c53030;
-            padding: 20px;
+            padding: 15px 20px;
             border-radius: 12px;
-            margin-top: 20px;
-            display: none;
+            margin-bottom: 20px;
             border-left: 4px solid #c53030;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #718096;
             display: none;
         }
 
-        .no-results-icon {
-            font-size: 4em;
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
             margin-bottom: 20px;
         }
 
-        .badge {
-            display: inline-block;
-            background: #48bb78;
-            color: white;
-            padding: 6px 12px;
+        .suggestion-chip {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 0.85em;
-            margin-left: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-chip:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
+                max-height: 95vh;
             }
 
             h1 {
-                font-size: 1.8em;
+                font-size: 1.6em;
             }
 
-            #topicInput {
-                padding: 15px 15px 15px 15px;
-                font-size: 1em;
+            .message-content {
+                max-width: 90%;
             }
 
-            #searchBtn {
+            #askBtn {
                 position: static;
-                transform: none;
                 width: 100%;
                 margin-top: 10px;
-            }
-
-            #searchBtn:hover {
-                transform: scale(1.02);
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎓 Gusto Knowledge Base</h1>
-        <p class="subtitle">Ask me anything you want to learn from Confluence</p>
+        <h1>🤖 Platform Operations Assistant</h1>
+        <p class="subtitle">Ask me anything about Platform Operations processes and procedures</p>
 
-        <div class="search-box">
-            <input 
-                type="text" 
-                id="topicInput" 
-                placeholder="What do you want to learn? (e.g., payment operations, SOP process, ICP...)"
-                autocomplete="off"
-            >
-            <button id="searchBtn">Search 🔍</button>
-        </div>
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <h2>👋 Hello! I'm your Platform Operations assistant</h2>
+                <p style="color: #4a5568; margin: 10px 0;">I can help you with:</p>
+                <ul>
+                    <li>Learning about processes (e.g., "What is the LOI process?")</li>
+                    <li>Understanding procedures (e.g., "How do I handle unintended overpayments?")</li>
+                    <li>Explaining concepts (e.g., "Tell me about SOP")</li>
+                    <li>Finding information (e.g., "I don't know what ICP means")</li>
+                </ul>
+            </div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Searching Confluence knowledge base...</p>
+            <div class="suggestions">
+                <div class="suggestion-chip" onclick="askQuestion('What is the LOI process?')">📋 LOI Process</div>
+                <div class="suggestion-chip" onclick="askQuestion('How do I handle unintended overpayments?')">💰 Overpayments</div>
+                <div class="suggestion-chip" onclick="askQuestion('What is SOP?')">📝 SOP</div>
+                <div class="suggestion-chip" onclick="askQuestion('Tell me about ICP')">🎯 ICP</div>
+            </div>
         </div>
 
         <div class="error" id="error"></div>
 
-        <div class="no-results" id="noResults">
-            <div class="no-results-icon">🔍</div>
-            <h3>No articles found</h3>
-            <p>Try searching with different keywords or terms</p>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Thinking and searching knowledge base...</p>
         </div>
 
-        <div class="results" id="results">
-            <div class="summary" id="summarySection">
-                <h2>📚 Summary</h2>
-                <div class="summary-content" id="summaryContent"></div>
-            </div>
-
-            <div class="articles">
-                <h3>📖 Related Articles <span class="badge" id="articleCount">0</span></h3>
-                <div id="articlesList"></div>
-            </div>
+        <div class="input-box">
+            <textarea 
+                id="questionInput" 
+                placeholder="Ask me anything... e.g., 'I want to learn about payment operations' or 'What is OH WH?'"
+                rows="2"
+            ></textarea>
+            <button id="askBtn">Ask 💬</button>
         </div>
     </div>
 
     <script>
         // Cloudflare Worker URL
         const WORKER_URL = 'https://late-firefly-bcc3.yarkinakcil.workers.dev';
-        const CONFLUENCE_DOMAIN = 'gustohq.atlassian.net';
 
-        const topicInput = document.getElementById('topicInput');
-        const searchBtn = document.getElementById('searchBtn');
+        const questionInput = document.getElementById('questionInput');
+        const askBtn = document.getElementById('askBtn');
         const loading = document.getElementById('loading');
         const error = document.getElementById('error');
-        const results = document.getElementById('results');
-        const noResults = document.getElementById('noResults');
-        const summaryContent = document.getElementById('summaryContent');
-        const articlesList = document.getElementById('articlesList');
-        const articleCount = document.getElementById('articleCount');
+        const chatContainer = document.getElementById('chatContainer');
 
-        // Search on Enter key
-        topicInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchTopic();
+        // Ask on Enter key (Shift+Enter for new line)
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askQuestionFromInput();
             }
         });
 
-        searchBtn.addEventListener('click', searchTopic);
+        askBtn.addEventListener('click', askQuestionFromInput);
 
-        async function searchTopic() {
-            const topic = topicInput.value.trim();
+        function askQuestion(question) {
+            questionInput.value = question;
+            askQuestionFromInput();
+        }
+
+        async function askQuestionFromInput() {
+            const question = questionInput.value.trim();
             
-            if (!topic) {
-                showError('Please enter a topic to search');
+            if (!question) {
+                showError('Please ask a question');
                 return;
             }
 
-            // Reset UI
-            hideAll();
+            // Add user message to chat
+            addMessage(question, 'user');
+
+            // Clear input
+            questionInput.value = '';
+
+            // Show loading
+            error.style.display = 'none';
             loading.style.display = 'block';
-            searchBtn.disabled = true;
+            askBtn.disabled = true;
 
             try {
-                // Call Cloudflare Worker
-                const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(topic)}`);
+                // Call Cloudflare Worker with AI
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question })
+                });
                 
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
@@ -350,96 +386,84 @@
 
                 const data = await response.json();
 
-                if (!data.results || data.results.length === 0) {
-                    showNoResults();
-                    return;
-                }
-
-                displayResults(data.results, topic);
+                // Add assistant response
+                addAssistantMessage(data.answer, data.articles || []);
 
             } catch (err) {
-                console.error('Search error:', err);
-                showError(`Failed to search Confluence: ${err.message}`);
+                console.error('Error:', err);
+                showError(`Sorry, I encountered an error: ${err.message}. Please try again.`);
             } finally {
                 loading.style.display = 'none';
-                searchBtn.disabled = false;
+                askBtn.disabled = false;
+                questionInput.focus();
             }
         }
 
-        function displayResults(articles, topic) {
-            // Generate summary
-            const summary = generateSummary(articles, topic);
-            summaryContent.innerHTML = summary;
-
-            // Display articles
-            articleCount.textContent = articles.length;
-            articlesList.innerHTML = '';
-
-            articles.forEach(article => {
-                const card = createArticleCard(article);
-                articlesList.appendChild(card);
-            });
-
-            results.style.display = 'block';
-        }
-
-        function generateSummary(articles, topic) {
-            const topSpaces = [...new Set(articles.map(a => a.space?.name).filter(Boolean))].slice(0, 3);
-            const spacesList = topSpaces.join(', ');
-
-            return `
-                <p><strong>Topic:</strong> ${escapeHtml(topic)}</p>
-                <p><strong>Found:</strong> ${articles.length} relevant article${articles.length > 1 ? 's' : ''}</p>
-                <p><strong>Spaces:</strong> ${spacesList || 'Various'}</p>
-                <p style="margin-top: 15px;">
-                    I found <strong>${articles.length}</strong> Confluence articles related to <strong>"${escapeHtml(topic)}"</strong>. 
-                    These articles cover various aspects and will help you understand the topic better. 
-                    Click on any article below to read the full content.
-                </p>
-            `;
-        }
-
-        function createArticleCard(article) {
-            const card = document.createElement('div');
-            card.className = 'article-card';
-
-            const title = document.createElement('div');
-            title.className = 'article-title';
-            title.textContent = article.title;
-
-            const space = document.createElement('span');
-            space.className = 'article-space';
-            space.textContent = article.space?.name || 'Unknown Space';
-
-            const excerpt = document.createElement('div');
-            excerpt.className = 'article-excerpt';
-            const content = article.body?.view?.value || article.excerpt || '';
-            excerpt.innerHTML = extractExcerpt(content);
-
-            const link = document.createElement('a');
-            link.className = 'article-link';
-            link.href = `https://${CONFLUENCE_DOMAIN}/wiki${article._links.webui}`;
-            link.target = '_blank';
-            link.textContent = 'Read full article →';
-
-            card.appendChild(title);
-            card.appendChild(space);
-            card.appendChild(excerpt);
-            card.appendChild(link);
-
-            return card;
-        }
-
-        function extractExcerpt(html, maxLength = 200) {
-            const text = html.replace(/<[^>]*>/g, ' ')
-                            .replace(/\s+/g, ' ')
-                            .trim();
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
             
-            if (text.length <= maxLength) {
-                return escapeHtml(text);
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            scrollToBottom();
+        }
+
+        function addAssistantMessage(answer, articles) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Add answer
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'assistant-answer';
+            answerDiv.textContent = answer;
+            contentDiv.appendChild(answerDiv);
+            
+            // Add articles if available
+            if (articles && articles.length > 0) {
+                const articlesSection = document.createElement('div');
+                articlesSection.className = 'articles-section';
+                
+                const title = document.createElement('div');
+                title.className = 'articles-title';
+                title.textContent = '📚 Related Articles:';
+                articlesSection.appendChild(title);
+                
+                articles.forEach(article => {
+                    const link = document.createElement('a');
+                    link.className = 'article-link';
+                    link.href = article.url;
+                    link.target = '_blank';
+                    link.innerHTML = `→ ${escapeHtml(article.title)} <span class="article-space">(${escapeHtml(article.space)})</span>`;
+                    articlesSection.appendChild(link);
+                });
+                
+                contentDiv.appendChild(articlesSection);
             }
             
-            return escapeHtml(text.substring(0, maxLength)) + '...';
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            scrollToBottom();
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
+            setTimeout(() => {
+                error.style.display = 'none';
+            }, 5000);
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
         function escapeHtml(text) {
@@ -448,22 +472,10 @@
             return div.innerHTML;
         }
 
-        function showError(message) {
-            hideAll();
-            error.textContent = message;
-            error.style.display = 'block';
-        }
-
-        function showNoResults() {
-            hideAll();
-            noResults.style.display = 'block';
-        }
-
-        function hideAll() {
-            error.style.display = 'none';
-            results.style.display = 'none';
-            noResults.style.display = 'none';
-        }
+        // Auto-focus input on load
+        window.addEventListener('load', () => {
+            questionInput.focus();
+        });
     </script>
 </body>
 </html>
