@@ -236,10 +236,15 @@
     </div>
 
     <script>
+        // Confluence authentication
+        const CONFLUENCE_EMAIL = 'yarkin.akcil@gusto.com';
         const CONFLUENCE_API_KEY = 'ATATT3xFfGF0DPdNek3hkIdA_A-AB3dc_RJ4qtMCuzTz-NJLvruBn9WOtIc3XcLCUhXCC02zbi0hfFcMLmwuR1E3pl-C0MUjnK82eqKFUZyeJ2IB08SHXcYQw5IrdO-KNv4uUKCm2-9--SuagbRC4o1aXDlmiFzD1z6vWvUR7UOGdxiaRkid2Pk=2117C5E8';
         
         // Confluence domain for Gusto
         const CONFLUENCE_DOMAIN = 'gustohq.atlassian.net';
+        
+        // Create base64 encoded auth string for Basic Authentication
+        const authString = btoa(`${CONFLUENCE_EMAIL}:${CONFLUENCE_API_KEY}`);
         
         // Allow Enter key to submit
         document.getElementById('learningTopic').addEventListener('keypress', function(e) {
@@ -280,7 +285,7 @@
             const response = await fetch(searchUrl, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${CONFLUENCE_API_KEY}`,
+                    'Authorization': `Basic ${authString}`,
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 }
